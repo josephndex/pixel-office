@@ -1,0 +1,209 @@
+#!/usr/bin/env bash
+# pixel-office -- launcher for the Pixel Agents visual office (Claude Code +
+# Hermes + Codex CLI providers). See README.md for the full writeup.
+#
+# Usage:
+#   pixel-office start [--port N]   Start the server in the background (default: always-on via systemd --user if available, else nohup)
+#   pixel-office stop               Stop it
+#   pixel-office status             Is it running? Which port? Health check.
+#   pixel-office doctor             Check the whole toolchain (node, providers, ports, dist build)
+#   pixel-office logs               Tail the background log (nohup mode only; systemd mode: journalctl --user -u pixel-office -f)
+#   pixel-office open               Print the URL to open in a browser
+
+set -euo pipefail
+
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+if command -v readlink >/dev/null 2>&1; then
+  SCRIPT_PATH="$(readlink -f "$SCRIPT_PATH" 2>/dev/null || echo "$SCRIPT_PATH")"
+fi
+BIN_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+PKG_DIR="$(dirname "$BIN_DIR")"
+STATE_DIR="$HOME/.pixel-agents"
+LOG_FILE="$STATE_DIR/pixel-office.log"
+PID_FILE="$STATE_DIR/pixel-office.pid"
+SYSTEMD_UNIT="pixel-office.service"
+SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
+DEFAULT_PORT="4173"
+
+mkdir -p "$STATE_DIR"
+
+has_systemd() {
+  command -v systemctl >/dev/null 2>&1 && systemctl --user status >/dev/null 2>&1
+}
+
+is_pid_alive() {
+  [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null
+}
+
+cmd_doctor() {
+  echo "== pixel-office doctor =="
+  echo
+  printf '%-28s' "Node.js:"
+  if command -v node >/dev/null 2>&1; then node -v; else echo "MISSING"; fi
+
+  printf '%-28s' "npm:"
+  if command -v npm >/dev/null 2>&1; then npm -v; else echo "MISSING"; fi
+
+  printf '%-28s' "Claude Code CLI:"
+  if command -v claude >/dev/null 2>&1; then claude --version 2>/dev/null | head -1; else echo "not found (Claude provider will just have nothing to attach to)"; fi
+
+  printf '%-28s' "Codex CLI:"
+  if command -v codex >/dev/null 2>&1; then codex --version 2>/dev/null | head -1; else echo "not found (Codex provider will just have nothing to tail)"; fi
+
+  printf '%-28s' "Hermes CLI:"
+  if command -v hermes >/dev/null 2>&1; then hermes version 2>/dev/null | head -1 || echo "found"; else echo "not found (Hermes provider will just have nothing to hook into)"; fi
+
+  printf '%-28s' "dist/cli.js built:"
+  if [ -f "$PKG_DIR/dist/cli.js" ]; then echo "yes"; else echo "NO -- run: (cd $PKG_DIR && npm install && npm run build)"; fi
+
+  printf '%-28s' "Hermes plugin bundled:"
+  if [ -f "$PKG_DIR/dist/hooks/pixel_agents_bridge_plugin.py" ]; then echo "yes"; else echo "NO -- rebuild needed"; fi
+
+  printf '%-28s' "systemd --user available:"
+  if has_systemd; then echo "yes (will run as a persistent service)"; else echo "no (will run via nohup instead)"; fi
+
+  echo
+  printf '%-28s' "Port $DEFAULT_PORT free:"
+  if command -v ss >/dev/null 2>&1 && ss -ltn 2>/dev/null | grep -q ":$DEFAULT_PORT "; then
+    echo "IN USE -- pick a different --port"
+  else
+    echo "free"
+  fi
+
+  echo
+  printf '%-28s' "Registered servers:"
+  ls "$STATE_DIR/servers/" 2>/dev/null | wc -l | tr -d ' '
+
+  echo
+  cmd_status || true
+}
+
+cmd_status() {
+  local port
+  port=$(cat "$STATE_DIR/last-port" 2>/dev/null || echo "$DEFAULT_PORT")
+
+  if has_systemd && systemctl --user is-active --quiet "$SYSTEMD_UNIT" 2>/dev/null; then
+    echo "pixel-office: running (systemd --user, always-on across reboots)"
+  elif [ -f "$PID_FILE" ] && is_pid_alive "$(cat "$PID_FILE")"; then
+    echo "pixel-office: running (pid $(cat "$PID_FILE"), nohup mode -- NOT persistent across reboot)"
+  else
+    echo "pixel-office: not running"
+    return 1
+  fi
+
+  if command -v curl >/dev/null 2>&1; then
+    local health
+    health=$(curl -fsS --max-time 2 "http://127.0.0.1:$port/api/health" 2>/dev/null || echo "")
+    if [ -n "$health" ]; then
+      echo "health: $health"
+      echo "url: http://127.0.0.1:$port"
+    else
+      echo "health check failed on port $port -- server may still be starting, or the port changed"
+    fi
+  fi
+}
+
+cmd_open() {
+  local port
+  port=$(cat "$STATE_DIR/last-port" 2>/dev/null || echo "$DEFAULT_PORT")
+  echo "http://127.0.0.1:$port"
+}
+
+cmd_stop() {
+  if has_systemd && systemctl --user is-active --quiet "$SYSTEMD_UNIT" 2>/dev/null; then
+    systemctl --user stop "$SYSTEMD_UNIT"
+    echo "Stopped (systemd)."
+    return
+  fi
+  if [ -f "$PID_FILE" ] && is_pid_alive "$(cat "$PID_FILE")"; then
+    kill "$(cat "$PID_FILE")"
+    rm -f "$PID_FILE"
+    echo "Stopped (nohup)."
+  else
+    echo "Not running."
+  fi
+}
+
+cmd_logs() {
+  if has_systemd && systemctl --user is-active --quiet "$SYSTEMD_UNIT" 2>/dev/null; then
+    journalctl --user -u "$SYSTEMD_UNIT" -f
+  else
+    tail -f "$LOG_FILE"
+  fi
+}
+
+install_systemd_unit() {
+  local port="$1"
+  mkdir -p "$SYSTEMD_USER_DIR"
+  cat > "$SYSTEMD_USER_DIR/$SYSTEMD_UNIT" <<EOF
+[Unit]
+Description=Pixel Agents office (Claude Code + Hermes + Codex visualization)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=$(command -v node) $PKG_DIR/dist/cli.js --port $port --host 127.0.0.1
+Restart=on-failure
+RestartSec=3
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=default.target
+EOF
+  systemctl --user daemon-reload
+  systemctl --user enable --now "$SYSTEMD_UNIT"
+}
+
+cmd_start() {
+  local port="$DEFAULT_PORT"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --port) port="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+
+  if [ ! -f "$PKG_DIR/dist/cli.js" ]; then
+    echo "dist/cli.js not built yet. Building now (first run only)..."
+    (cd "$PKG_DIR" && npm install --no-audit --no-fund && node esbuild.js --production && npm run build:webview)
+  fi
+
+  echo "$port" > "$STATE_DIR/last-port"
+
+  if has_systemd; then
+    install_systemd_unit "$port"
+    echo "Started as a systemd --user service: always-on, survives logout/reboot"
+    echo "  status:  systemctl --user status $SYSTEMD_UNIT"
+    echo "  logs:    pixel-office logs"
+  else
+    if [ -f "$PID_FILE" ] && is_pid_alive "$(cat "$PID_FILE")"; then
+      echo "Already running (pid $(cat "$PID_FILE"))."
+    else
+      nohup node "$PKG_DIR/dist/cli.js" --port "$port" --host 127.0.0.1 > "$LOG_FILE" 2>&1 &
+      echo $! > "$PID_FILE"
+      disown
+      echo "Started in background (pid $!). NOTE: no systemd --user available on this"
+      echo "machine, so this will NOT survive a reboot/logout automatically. Re-run"
+      echo "'pixel-office start' after a reboot, or set up a cron @reboot entry."
+    fi
+  fi
+
+  sleep 2
+  echo
+  cmd_status || true
+  echo
+  echo "Open: http://127.0.0.1:$port"
+}
+
+case "${1:-}" in
+  start) shift; cmd_start "$@" ;;
+  stop) cmd_stop ;;
+  status) cmd_status ;;
+  doctor) cmd_doctor ;;
+  logs) cmd_logs ;;
+  open) cmd_open ;;
+  *)
+    echo "Usage: pixel-office {start|stop|status|doctor|logs|open} [--port N]"
+    exit 1
+    ;;
+esac

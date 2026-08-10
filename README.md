@@ -1,233 +1,234 @@
-<h1 align="center">
-  <a href="https://github.com/pixel-agents-hq/pixel-agents/discussions">
-    <img src="webview-ui/public/banner.png" alt="Pixel Agents">
-  </a>
-</h1>
+# pixel-office
 
-<h2 align="center">The most playful way to orchestrate your agents</h2>
+A pixel-art visual office where your AI coding agents — **Claude Code**, **Codex CLI**,
+and **Hermes Agent** — show up as animated characters that walk to their desks, type
+when editing files, read when searching, and flag you when they're stuck waiting for
+input. Built on top of [Pixel Agents](https://github.com/pixel-agents-hq/pixel-agents)
+(MIT), extended here with two new provider integrations (Hermes, Codex) and multi-provider
+support in the runtime so all three can run in the same office at once.
 
-<div align="center">
+See [`UPSTREAM_README.md`](./UPSTREAM_README.md) for the original project's own
+documentation (VS Code extension, layout editor, asset system, etc.) — this file covers
+what's specific to this fork: the Hermes and Codex integrations, the `pixel-office`
+launcher, and how the pieces fit together.
 
-[![version](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpablodelucca%2F3cd28398fa4a2c0a636e1d51d41aee39%2Fraw%2Fversion.json)](https://github.com/pixel-agents-hq/pixel-agents/releases)
-[![marketplaces](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpablodelucca%2F3cd28398fa4a2c0a636e1d51d41aee39%2Fraw%2Finstalls.json)](https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents)
-[![npm downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2Fpablodelucca%2F3cd28398fa4a2c0a636e1d51d41aee39%2Fraw%2Fnpm-downloads.json)](https://www.npmjs.com/package/pixel-agents)
-[![stars](https://img.shields.io/github/stars/pixel-agents-hq/pixel-agents?logo=github&color=0183ff&style=flat)](https://github.com/pixel-agents-hq/pixel-agents/stargazers)
-[![license](https://img.shields.io/github/license/pixel-agents-hq/pixel-agents?color=0183ff&style=flat)](https://github.com/pixel-agents-hq/pixel-agents/blob/main/LICENSE)
-[![discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white&style=flat)](https://discord.gg/Yk7jXebv9H)
+## Architecture
 
-</div>
-
-<div align="center">
-<a href="https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents">🛒 VS Code Marketplace</a> • <a href="https://open-vsx.org/extension/pablodelucca/pixel-agents">🛒 Open VSX</a> • <a href="https://www.npmjs.com/package/pixel-agents">📦 npm</a> • <a href="https://discord.gg/Yk7jXebv9H">👾 Discord</a> • <a href="https://github.com/pixel-agents-hq/pixel-agents/discussions">💬 Discussions</a> • <a href="CONTRIBUTING.md">🤝 Contributing</a> • <a href="CHANGELOG.md">📋 Changelog</a>
-</div>
-
-<br/>
-
-Pixel Agents turns the AI coding agents running in your terminals into animated pixel-art characters working in a tiny office. They walk to their desks, sit down, type when they're editing files, read when they're searching, and flag you visually when they're stuck waiting for input.
-
-It ships in two forms from the same codebase:
-
-- **VS Code extension** — [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents) and [Open VSX](https://open-vsx.org/extension/pablodelucca/pixel-agents). Agents launch into VS Code terminals; characters render in the panel area.
-- **Standalone CLI** — `npx pixel-agents` starts a local server and serves the same office as a browser app, useful for tmux, remote, and non-VS Code workflows.
-
-The architecture is fully agent-agnostic and editor-agnostic: a typed `HookProvider` interface defines the integration boundary so adding a new AI tool is a single subdirectory of code. Claude Code is the reference implementation today; Codex, Gemini, Cursor, and others are on the roadmap.
-
-![Pixel Agents screenshot](webview-ui/public/office.png)
-
-## Features
-
-- **One agent, one character** — every Claude Code terminal gets its own animated character
-- **Live activity tracking** — characters animate based on what the agent is actually doing (writing, reading, running commands)
-- **Office layout editor** — design your office with floors, walls, and furniture using a built-in editor
-- **Speech bubbles** — visual indicators when an agent is waiting for input or awaiting permission
-- **Sound notifications** — optional chimes when an agent finishes its turn or requests permission
-- **Sub-agents and Agent Teams** — see ephemeral sub-agents and persistent Claude teammates as separate characters, including team roles and lifecycle changes
-- **Persistent layouts** — your office design is saved and shared across VS Code windows
-- **Shared layout and assets** — import/export layouts and load external character, pet, and furniture packs
-- **Areas** — paint named areas onto the office, map workspace folders to them, and new agents sit inside the areas mapped to their folder
-- **Diverse characters** — 6 diverse characters. These are based on the amazing work of [JIK-A-4, Metro City](https://jik-a-4.itch.io/metrocity-free-topdown-character-pack).
-
-<p align="center">
-  <img src="webview-ui/public/characters.png" alt="Pixel Agents characters" width="320" height="72" style="image-rendering: pixelated;">
-</p>
-
-## Where This Is Going
-
-The vision is: play a game, build a product. Two goals follow from it: to build a familiar, intuitive interface for running and orchestrating a lot of agents; and to make the hours you spend doing it feel less like administration and more like play.
-
-Roughly three stages get there:
-
-1. **Everywhere, with everything.** Today it's Claude Code in VS Code or the browser. It should be whatever agent you run, wherever you work. A new CLI is a subdirectory, not a rewrite — this is where help is most useful right now.
-2. **Actually a game.** Health bars for rate limits and token budgets. Scores for whatever you care about. Furniture that _does_ things. Offices you open like save files, one per project.
-3. **Expand the orchestration frontier.** Orchestrator characters. Form a team by dragging a box around them. Hand work between agents. Point them at a board and let them pick up tasks themselves.
-
-Most of this is still ahead. See [Issues](https://github.com/pixel-agents-hq/pixel-agents/issues) and [Discussions](https://github.com/pixel-agents-hq/pixel-agents/discussions) for what's open, and [CONTRIBUTING.md](CONTRIBUTING.md) to jump in.
-
-## Requirements
-
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed and configured
-- **VS Code extension:** VS Code 1.105.0 or later
-- **Standalone CLI:** Node.js 20 or later
-- Windows, Linux, or macOS
-
-## Getting Started
-
-### VS Code extension
-
-1. Install Pixel Agents from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=pablodelucca.pixel-agents) or [Open VSX](https://open-vsx.org/extension/pablodelucca/pixel-agents).
-2. Open the **Pixel Agents** panel beside the terminal.
-3. Click **+ Agent** to launch Claude Code. In a multi-root workspace, select the folder first.
-
-To use Claude with `--dangerously-skip-permissions`, hover over **+ Agent** to find the **Skip permissions mode** button. Only use this when you accept the security implications.
-
-Pixel Agents also detects Claude sessions started outside the extension. Turn on **Settings → Watch All Sessions** to include sessions from other workspaces.
-
-### Standalone CLI
-
-Run Pixel Agents from the workspace whose Claude sessions you want to see:
-
-```bash
-cd /path/to/your/project
-npx pixel-agents
+```
+                      ┌─────────────────────┐
+                      │   Pixel Office UI   │   http://127.0.0.1:4173
+                      │ (browser, WebSocket) │
+                      └──────────▲──────────┘
+                                 │
+                        normalized AgentEvent
+                                 │
+                POST /api/hooks/:providerId (one Fastify server, one AgentStateStore)
+                                 │
+                ┌────────────────┼─────────────────┐
+                │                │                 │
+            claude            hermes             codex
+                │                │                 │
+        official Claude    pixel-agents-bridge   in-process
+        Code hooks API     plugin (Python,       JSONL tailer
+        (unmodified)       ~/.hermes/plugins/)   (~/.codex/sessions/**/*.jsonl)
 ```
 
-The CLI chooses a free local port and prints the URL. Standalone does not launch Claude for you; start Claude Code in a terminal for the same workspace. To install the command globally instead:
+One server process, one `AgentStateStore`, one office — every provider's agents render
+side by side, each tagged with which CLI they came from. This required a small patch to
+the upstream `AgentRuntime`/`HookEventHandler` (previously hardcoded to exactly one
+provider) so it now runs one `HookEventHandler` per registered provider, routed by the
+`providerId` the wire protocol already carried. See `server/src/agentRuntime.ts`.
+
+## What works with each provider
+
+### Claude Code — unmodified, official integration
+
+Uses the upstream `claudeProvider` exactly as shipped: installs Claude Code's real Hooks
+API into `~/.claude/settings.json` on startup, receives `SessionStart/Stop/PreToolUse/
+PostToolUse/SubagentStart/SubagentStop/...` events live over HTTP. Nothing about Claude
+support was changed by this fork (verified — see Testing below).
+
+### Codex CLI — structured JSONL, in-process tailer
+
+Codex CLI (0.144.1 as tested) has no hooks/plugin API. It does write a structured,
+append-only JSONL rollout per session to `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`
+(`session_meta`, `response_item` with `function_call`/`function_call_output`,
+`event_msg` with `task_complete`). `server/src/providers/hook/codex/codexTailer.ts`
+polls that directory (1.5s interval, byte-offset tracked per file, partial-line safe),
+parses new lines, and re-emits them through the exact same `POST /api/hooks/codex`
+ingress a real hook script would use. This is reading Codex's own structured session
+format, not scraping terminal output.
+
+Limitation: Codex's rollout format never writes an explicit "session ended" record, so
+the tailer heuristically closes a session after 10 minutes of no new lines. A real
+session end (Ctrl+C, `codex exec` returning) is picked up as soon as it happens if Codex
+itself is still writing to the file up to that point; the 10-minute timer only covers the
+case where it doesn't.
+
+### Hermes Agent — plugin hooks, future sessions only
+
+Hermes Agent (v0.20.0 as tested) actually has **three separate hook systems** — this
+matters, because two of them looked promising and don't work for this use case:
+
+- **Gateway hooks** (`~/.hermes/hooks/`) — fire only for messaging-platform sessions
+  (Telegram/Discord/Slack/WhatsApp/Teams). **Do not fire for CLI sessions at all.**
+- **Shell hooks** (`hooks:` block in `config.yaml`) — CLI + gateway, but a small fixed
+  set of directive events, invoked as external shell scripts.
+- **Plugin hooks** (`ctx.register_hook()` in `~/.hermes/plugins/<name>/`) — CLI +
+  gateway, the full documented catalog (`pre_tool_call`, `post_tool_call`,
+  `on_session_start`, `on_session_end`, `on_session_finalize`, `subagent_start`,
+  `subagent_stop`, ...). **This is the one that actually covers CLI sessions.**
+
+`hermesProvider.installHooks()` drops a small Python plugin at
+`~/.hermes/plugins/pixel-agents-bridge/` (source:
+`server/src/providers/hook/hermes/pixel_agents_bridge_plugin.py`) and runs
+`hermes plugins enable pixel-agents-bridge` (the documented, idempotent CLI for Hermes's
+opt-in plugin allow-list — nothing hand-edits `config.yaml` directly). The plugin uses
+only Python's stdlib (`urllib`), so it adds no dependency to Hermes's venv. It reads
+`~/.hermes/plugins/pixel-agents-bridge/`, connects to the pixel-office server registry
+under `~/.pixel-agents/servers/*.json`, and POSTs normalized events — it never reads
+Hermes session content, prompts, or config beyond what the plugin-hook payload itself
+hands it.
+
+**Important limitation, by design of Hermes itself**: `HookRegistry.discover_and_load()`
+scans `~/.hermes/plugins/` once, at process start. A Hermes session that was already
+running before the plugin was installed cannot retroactively receive plugin-hook events
+— there is no live-reload. New `hermes` sessions started after installation are hooked
+automatically; anything already running when you first ran `pixel-office start` is not,
+and won't be until you restart it yourself (this repo will never restart a Hermes session
+for you).
+
+**Fallback for an already-running session**: `scripts/fallback/watch-live-hermes.mjs` is
+a read-only, opt-in script for that gap. It watches `/proc/<pid>/stat` CPU-time deltas
+for a specific Hermes PID (a real, kernel-reported, read-only signal for "is this process
+doing work right now") and reports coarse busy/idle transitions to the office, labeled
+explicitly as `"Observed process activity (read-only)"` — never a fabricated tool name,
+file, or command, because this script has no access to any of that. It never reads
+`~/.hermes/sessions/`, `config.yaml`, or any Hermes state; the only file it touches is
+the pixel-office server registry, read-only.
 
 ```bash
-npm install --global pixel-agents
-pixel-agents
+node scripts/fallback/watch-live-hermes.mjs --pid <PID> [--session-id my-label] [--cwd /path]
+# Ctrl+C sends a clean SessionEnd before exiting.
 ```
 
-Use a fixed address or port when needed:
+## Multi-agent behavior
+
+Each character is labeled with its provider (Claude Code / Codex CLI / Hermes Agent) so
+you can tell them apart at a glance. Simultaneous sessions from different providers, or
+multiple sessions from the same provider, render as separate characters sharing one
+office — same store, same layout, independently tracked lifecycles. Stopping one agent
+(session end) never affects any other agent's state; each provider's `HookEventHandler`
+instance is independent (see `server/src/agentRuntime.ts`).
+
+No hidden reasoning/chain-of-thought is ever displayed — only tool names, file paths
+(basenames), and coarse status (active/waiting/done), the same discipline the upstream
+Claude provider already follows.
+
+## Reliability notes
+
+- **No API credentials ever reach the visualizer.** The only cross-process secret is a
+  locally-generated bearer token (`~/.pixel-agents/servers/*.json`) authenticating hook
+  POSTs to `127.0.0.1` — never sent anywhere else, never a model/provider API key.
+- **Binds to 127.0.0.1 by default.** No public exposure unless you explicitly change
+  `--host`.
+- **Graceful degradation**: if one provider's install fails (e.g. `hermes` isn't on
+  `PATH`), the other two still start normally — see `installAllHooks()` in
+  `server/src/cli.ts`.
+- **No duplicate agents on reconnect/restart**: session routing is keyed by
+  `providerId` + the CLI's own session id, not by connection.
+- **Codex tailer is debounced and offset-tracked** — it never re-reads a file from byte
+  zero on every poll, and skips historical rollouts older than the stale window on first
+  scan, so it doesn't chew CPU walking years of `~/.codex/sessions/`.
+- **Malformed/truncated JSONL lines are skipped, never crash the tailer** (partial last
+  line is buffered and retried next poll, exactly like the upstream Claude file-watcher).
+
+## Testing
 
 ```bash
-pixel-agents --port 3100
-pixel-agents --host 127.0.0.1 --port 3100
-pixel-agents --help
+npm install
+npm run build            # esbuild (CLI + hooks + Hermes plugin copy) + webview
+cd server && npx vitest run
 ```
 
-The default bind address is `127.0.0.1`. Binding to `0.0.0.0` exposes the UI and WebSocket to the local network; do this only on a trusted network.
+419 tests pass (377 from upstream, unmodified — verifying this fork didn't regress
+Claude support — plus 42 new tests for the multi-provider routing patch, the Codex
+provider, and the Hermes provider). New coverage: `server/__tests__/codex.test.ts`,
+`server/__tests__/hermes.test.ts`, `server/__tests__/agentRuntime.multiProvider.test.ts`
+(simultaneous sessions from different providers, duplicate-event handling, malformed
+events, unknown `providerId`, isolated tool state between concurrent agents, clean
+`dispose()`).
 
-Pass `--no-terminal` to disable the embedded terminal — watch agents without launching or attaching to them from the browser.
+## Installing and running
 
-### Running the extension and standalone together
-
-The extension and standalone CLI can run at the same time. Each server registers under `~/.pixel-agents/servers/`; the Claude hook script sends events to all active registrations. VS Code and standalone keep separate agents, seats, and settings while using the shared office layout.
-
-Stop a standalone server with **Ctrl+C**. It removes only its own registration.
-
-## Customizing the Office
-
-Click **Layout** to edit the office:
-
-- Paint floor patterns and walls, with color and contrast controls.
-- Place, rotate, recolor, select, and remove furniture.
-- Paint auto-tiling carpets and customize their main and accent colors.
-- Add animated pets; click a pet in the office to interact with it.
-- Create named **Areas**, paint their tiles, and assign workspace folders to them.
-- Undo/redo changes, then import or export the complete layout as JSON.
-
-Layouts can grow to 64×64 tiles by clicking the ghost border outside the current grid.
-
-### Office assets
-
-Bundled furniture, floors, walls, carpets, characters, and pets live under `webview-ui/public/assets/`. Furniture manifests describe sprites, rotation groups, state groups, and animation frames.
-
-Use **Settings → Add Asset Directory** to load external characters, pets, and furniture. See [docs/external-assets.md](docs/external-assets.md) for furniture directory structure and manifest details. The visual asset manager at `scripts/asset-manager.html` helps create furniture manifests.
-
-## How It Works
-
-Pixel Agents uses two Claude Code detection paths:
-
-- **Hooks mode** (default) — a hook script receives Claude events such as `SessionStart`, `PreToolUse`, `PermissionRequest`, and `Stop`. It discovers active Pixel Agents servers and sends authenticated events to each one.
-- **Heuristic mode** (fallback) — when hooks are unavailable, the runtime infers agent status by scanning Claude's JSONL session transcripts under `~/.claude/projects/`. Transcripts are also read in hooks mode for details not present in an event.
-
-The Claude provider normalizes both sources into a shared `AgentEvent` model. `AgentRuntime` updates the central state store, and the active transport sends typed messages to the React webview. The office renders through Canvas 2D with pathfinding and character state machines.
-
-Pixel Agents does not modify Claude Code. Its hook configuration and persistent data live under `~/.claude/` and `~/.pixel-agents/` respectively.
-
-### Architecture
-
-- **`core/`** — provider, adapter, transport, schema, and AsyncAPI message contracts with no runtime side effects.
-- **`server/`** — shared Fastify server, agent runtime, persistence, Claude provider, transcript scanning, and standalone CLI.
-- **`adapters/vscode/`** — the VS Code adapter: terminal, persistence, and webview bridge.
-- **`webview-ui/`** — React 19, Vite, Canvas 2D, and adapter-specific transports for VS Code and browser WebSocket clients.
-
-The extension and CLI are bundled with esbuild; the webview is built with Vite. Unit tests use Vitest and Node's test runner, and end-to-end coverage uses Playwright against VS Code and standalone.
-
-## Development
+Requires Node.js >= 20.
 
 ```bash
-git clone https://github.com/pixel-agents-hq/pixel-agents.git
-cd pixel-agents
+git clone <this-repo-url> pixel-office
+cd pixel-office
 npm install
 npm run build
 ```
 
-Press **F5** in VS Code to launch the Extension Development Host. To run the standalone bundle built from source:
+Then use the launcher (works from anywhere once linked onto your `PATH`):
 
 ```bash
-node dist/cli.js
+ln -s "$(pwd)/bin/pixel-office" ~/.local/bin/pixel-office   # one-time
+pixel-office start     # builds if needed, starts the server, installs hooks for
+                        # every provider that's actually present on the machine
+pixel-office status     # is it running, on which port, health check
+pixel-office doctor      # full toolchain check: node, claude/codex/hermes CLIs,
+                          # dist build, plugin bundling, port availability
+pixel-office logs         # tail the server's logs
+pixel-office open          # print the URL
+pixel-office stop           # stop it
 ```
 
-Common checks:
+`pixel-office start` prefers a `systemd --user` service (always-on, survives logout and
+reboot) when available, and falls back to a background `nohup` process otherwise (with a
+clear note that you'll need to restart it after a reboot in that case).
 
-```bash
-npm run check-types
-npm run lint
-npm test
-npm run e2e
+Open the printed URL (default `http://127.0.0.1:4173`) in a browser. That's the whole
+interface — no separate "connect" step.
+
+### If agents don't appear
+
+Run `pixel-office doctor` first. Common causes:
+
+- **Claude**: hooks install automatically; if nothing shows up, confirm you're running
+  Claude Code from a directory the office is scanning, or enable "Watch All Sessions" in
+  the UI settings.
+- **Codex**: same "Watch All Sessions" gate applies — the tailer detects and forwards
+  every session's events, but the runtime still only _adopts_ sessions from tracked
+  project directories unless Watch All Sessions is on (same privacy-preserving gate
+  Claude uses; verified in this fork's E2E pass — a Codex session in an untracked temp
+  dir correctly logged "not adopted" while still proving the full parse → normalize →
+  route pipeline worked).
+- **Hermes**: confirm `hermes plugins list` shows `pixel-agents-bridge` as `enabled`,
+  then **start a new Hermes CLI session** (existing ones won't retroactively pick up the
+  plugin — see the Hermes section above).
+
+## Files changed/added on top of upstream
+
 ```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and [e2e/README.md](e2e/README.md) for the end-to-end suite.
-
-### Hosted Test Reports
-
-Build the combined Allure report locally and stage it for Vercel:
-
-```bash
-npm run test
-npm run e2e
-npm run e2e -- --attach-videos-on-success
-npm run vercel:prepare
+server/src/agentRuntime.ts                        multi-provider routing patch
+server/src/cli.ts                                  registers all 3 providers, install/uninstall orchestration
+server/src/providers/index.ts                       exports codexProvider, hermesProvider
+server/src/providers/hook/codex/                    new: codex.ts, codexTailer.ts, constants.ts
+server/src/providers/hook/hermes/                    new: hermes.ts, hermesHookInstaller.ts, constants.ts,
+                                                       pixel_agents_bridge_plugin.py
+server/__tests__/codex.test.ts                       new
+server/__tests__/hermes.test.ts                       new
+server/__tests__/agentRuntime.multiProvider.test.ts    new
+esbuild.js                                           copies the Hermes plugin into dist/hooks/
+package.json                                          dist/hooks/pixel_agents_bridge_plugin.py in the files allowlist
+bin/pixel-office                                      new: start/stop/status/doctor/logs/open launcher
+scripts/fallback/watch-live-hermes.mjs                 new: read-only CPU-activity fallback for a Hermes
+                                                        session that predates plugin installation
 ```
-
-Use `npm run test:report` to build the combined report without preparing the Vercel output, then `npm run test:report:open` to serve it locally.
-
-The staged output serves the combined `e2e`, `server`, and `webview` Allure report at `/reports/allure/`; it does not include a standalone webview preview. GitHub Actions creates a Vercel Preview deployment only for same-repository pull requests targeting `main`. The deploy job expects `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` secrets and skips fork pull requests.
-
-## Troubleshooting
-
-- **Standalone will not start:** verify Node.js 20+, omit `--port` to choose a free port, or select another fixed port.
-- **An agent is missing:** confirm **Settings → Instant Detection (Hooks)** is on and that the session belongs to the current workspace. Enable **Watch All Sessions** if needed.
-- **The UI looks disconnected:** open **Settings → Debug View** to inspect the server connection, transcript path, and latest agent data.
-- **Extension and standalone are both running:** this is supported. Current versions create separate files under `~/.pixel-agents/servers/`; stopping one does not remove the other.
-
-## Community & Contributing
-
-Join the [Discord](https://discord.gg/Yk7jXebv9H) to chat with other users and follow development. Use [Issues](https://github.com/pixel-agents-hq/pixel-agents/issues) to report bugs or request features, and [Discussions](https://github.com/pixel-agents-hq/pixel-agents/discussions) for questions and ideas.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request and read our [Code of Conduct](CODE_OF_CONDUCT.md) before participating.
-
-## Supporting the Project
-
-<a href="https://github.com/sponsors/pablodelucca">
-  <img src="https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=github" alt="GitHub Sponsors">
-</a>
-<a href="https://ko-fi.com/pablodelucca">
-  <img src="https://img.shields.io/badge/Support-Ko--fi-ff5e5b?logo=ko-fi" alt="Ko-fi">
-</a>
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=pixel-agents-hq%2Fpixel-agents&type=date&legend=bottom-right">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=pixel-agents-hq/pixel-agents&type=date&theme=dark&legend=bottom-right&sealed_token=Vn3YGMuZ_HFZAf56zIUQGCBJDYtDq38sOReKlcxWklxR_ilwVLynb7CPraf5uPhnAU7fwHXXoO88tzLkq9tpEYIExl4N8tcXOmu0ehAXPu5DdXNwjixYsxb00LSfeJ25f_jLkcZcTpRKLKYOb9p4_dR1jjAyrWDs7aicdbqejaDtLcVyj-oSoKkBfrS5" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=pixel-agents-hq/pixel-agents&type=date&legend=bottom-right&sealed_token=Vn3YGMuZ_HFZAf56zIUQGCBJDYtDq38sOReKlcxWklxR_ilwVLynb7CPraf5uPhnAU7fwHXXoO88tzLkq9tpEYIExl4N8tcXOmu0ehAXPu5DdXNwjixYsxb00LSfeJ25f_jLkcZcTpRKLKYOb9p4_dR1jjAyrWDs7aicdbqejaDtLcVyj-oSoKkBfrS5" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=pixel-agents-hq/pixel-agents&type=date&legend=bottom-right&sealed_token=Vn3YGMuZ_HFZAf56zIUQGCBJDYtDq38sOReKlcxWklxR_ilwVLynb7CPraf5uPhnAU7fwHXXoO88tzLkq9tpEYIExl4N8tcXOmu0ehAXPu5DdXNwjixYsxb00LSfeJ25f_jLkcZcTpRKLKYOb9p4_dR1jjAyrWDs7aicdbqejaDtLcVyj-oSoKkBfrS5" />
- </picture>
-</a>
 
 ## License
 
-Pixel Agents is available under the [MIT License](LICENSE).
+MIT, same as upstream. See [`LICENSE`](./LICENSE). `UPSTREAM_README.md` is the original
+project's README, kept for attribution and its own (still-accurate) documentation of
+everything not covered here.
