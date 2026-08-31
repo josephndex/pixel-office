@@ -6,8 +6,8 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "allure-vitest": "^3.9.0",
-    "vitest": "^4.1.10"
+    "allure-vitest": "^3.11.0",
+    "vitest": "^4.1.11"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",
